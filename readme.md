@@ -23,9 +23,9 @@ LED INFO CODE (blink)
 - Yellow : text code sent / Boot
 
 # Protocols managed:
-RemoteTransmitter (old)
-NewRemoteTransmitter (new)
-RadioHead (text)
+* RemoteTransmitter (old)
+* NewRemoteTransmitter (new)
+* RadioHead (text)
 
 See https://bitbucket.org/fuzzillogic/433mhzforarduino/ for more information.
 
@@ -41,13 +41,13 @@ Everything can be changed except for Receiver.
 * Neopixel (WS2812b)                    : ```` 4````
 
 # Usage
-Commands are sent with a REST syntax
+* Commands are sent with a REST syntax
 ````/radio/text/Hello World````  
-Data are received in JSON
-````{"data" : "/radio/text/Hello World"}````  
-Errors are received in JSON
+* Data are received in JSON
+````{"data" : "/radio/text/Hello World"}````
+* Errors are received in JSON
 ```` {"err":"Rx not plugged"} ````
-Debug info are received in JSON
+* Debug info are received in JSON
 ```` {\"ret\":\"/radio/OK\"} ````
 
 
@@ -57,7 +57,7 @@ Type into your arduino serial port theses messages to use them
 ## info
 Display sketch name/url/version/pinout and state.
 ````  info ````
-return
+***return***
 ```` {"file":"radio2serial.ino","url":"smarturl.it/radio2serial","ver":"0.50","pins":"tx:10;rx:2;led:4","state":"tx:1;rx:1"} ````
 ## radio
 .
@@ -81,5 +81,5 @@ You can add pulse into your new/old
 blink the led in green  
 ```` /led/green ````
 
-Display color availables
+Display color availables   
 ```` /led/? ````
