@@ -170,8 +170,9 @@ void setupRadio(){
   InterruptChain::addInterruptCallback(0, showVW434);
   //RadioHead Text SETUP
   driver.init();
-
-  checkTxRadio();
+  if (rxStatus) {
+  checkTxRadio(); 
+}
 }
 
 /*
@@ -208,11 +209,9 @@ void checkRxRadio() {
 void checkTxRadio() {
   sendNew434("/radio/new/1234/0/off");
   if (!txStatus) {
-    if (rxStatus) {
       Serial.println("{\"err\":\"Tx not plugged\"}");
       leds[0] = CRGB::Red;
       FastLED.show();
-    }
   }
 }
 
