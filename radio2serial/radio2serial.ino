@@ -277,7 +277,7 @@ void showVW434() {
     radiocode = (char *)buf;
     Serial.print("{\"data\" : \"/radio/text/");
     Serial.print(radiocode);
-    Serial.println("\"})");
+    Serial.println("\"}");
   }
 }
 
