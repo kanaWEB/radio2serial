@@ -1,5 +1,5 @@
 //radio2serial.ino
-//version: 0.5
+//version: 0.52
 //github url: http://smarturl.it/radio2serial
 //
 //Commands are sent with a REST syntax (ex: radio/text/Hello World)
@@ -9,7 +9,6 @@
 // Library required
 // RadioHead : http://www.airspayce.com/mikem/arduino/RadioHead/
 // 433mhzforarduino : https://bitbucket.org/fuzzillogic/433mhzforarduino/
-// FastLed : http://fastled.io/
 
 //PinOut
 //ASK 433Mhz Transmitter                : 10
@@ -28,12 +27,16 @@
 #include <RH_ASK.h>
 #include <SPI.h> // Not actualy used but needed to compile
 
-
 //Led
 #include <FastLED.h>
 
 //INFO
-const float VER = 0.5; 
+const float VER = 0.52; 
+
+//Leds
+const int DATA_PIN = 4; //Neo Pixel RGB led
+const int NUM_LEDS = 1;
+CRGB leds[NUM_LEDS];
 
 //Radio
 const int txPin = 10;
@@ -45,11 +48,6 @@ const int statusLedPin = 13;
 RH_ASK driver(2000, rxPin, txPin, statusLedPin, false);
 const int RADIOHEAD_LATENCY_CORRECTION = 45;
 
-//Leds
-const int DATA_PIN = 4; //Neo Pixel RGB led
-const int NUM_LEDS = 1;
-CRGB leds[NUM_LEDS];
-
 void setup() {
   //Serial Setup
   Serial.begin(115200);
@@ -57,7 +55,6 @@ void setup() {
   Serial.println("{\"ret\":\"Init\"}");
   Serial.println("{\"ret\":\"Test Radio\"}");
   
-  setupLed();
   setupRadio();
   sendInfo();
 
@@ -82,7 +79,7 @@ void checkCommand() {
     String line = Serial.readStringUntil('\n');
     String command = getValue(line, '/', 1);
     if (command == "") {
-      Serial.println("{\"err\":\"INVALID COMMAND - info,radio,led\"}");
+      Serial.println("{\"err\":\"INVALID COMMAND - /info,/radio\"}");
     }
     else
     {
@@ -98,11 +95,8 @@ void checkCommand() {
           sendText434(line);
         }
         else {
-          Serial.println("{\"err\":\"INVALID PROTOCOL - old,new,text\"}");
+          Serial.println("{\"err\":\"INVALID PROTOCOL - /radio/old,/radio/new,/radio/text\"}");
         }
-      }
-      else if (command == "led") {
-        controlLed(line);
       }
       else if (command == "info") {
         sendInfo();
@@ -196,8 +190,7 @@ void checkRxRadio() {
   if (testRadioLow == 64) {
     rxStatus = false;
     Serial.println("{\"err\":\"Rx not plugged\"}");
-    leds[0] = CRGB::Yellow;
-    FastLED.show();
+
   }
   else
   {
@@ -295,13 +288,12 @@ void sendText434(String line) {
   driver.send((uint8_t *)msg, strlen(msg));
   driver.waitPacketSent();
   Serial.println("{\"ret\":\"/radio/OK\"}");
-  blinkLed(CRGB::Yellow);
+
   }
   else
   {
   Serial.println("{\"err\":\"Text too long\"}");
-  leds[0] = CRGB::Blue;
-  FastLED.show();
+
   }
   
 }
@@ -322,7 +314,7 @@ void sendOld434(String line) {
 
   RemoteTransmitter::sendCode(txPin, code, (period - RADIOHEAD_LATENCY_CORRECTION), 3);
   Serial.println("{\"ret\":\"/radio/OK\"}");
-  blinkLed(CRGB::Blue);
+  
   //Serial.println(code);
   //Serial.println(period);
 }
@@ -372,67 +364,9 @@ void sendNew434(String line) {
   }
 
   Serial.println("{\"ret\":\"/radio/OK\"}");
-  blinkLed(CRGB::Green);
+  
   //Serial.println(address);
   //Serial.println(id);
   //Serial.println(level);
   //Serial.println(period);
 }
-
-/*
-
-
-
-
-Neo Pixel Led 
-
-
-
-*/
-
-
-void setupLed(){
- //Led setup
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  blinkLed(CRGB::Yellow);
-
-}
-
-void controlLed(String line) {
-  String color = getValue(line, '/', 2);
-  if (color == "red") {
-    blinkLed(CRGB::Red);
-  }
-  else if (color == "green") {
-    blinkLed(CRGB::Green);
-  }
-  else if (color == "blue") {
-    blinkLed(CRGB::Blue);
-  }
-  else if (color == "white") {
-    blinkLed(CRGB::White);
-  }
-  else if (color == "off") {
-    blinkLed(CRGB::Black);
-  }
-  else {
-    Serial.println("{\"err\":\"INVALID COLOR : red,green,white,off\"}");
-  }
-}
-
-void blinkLed(const CRGB& color) {
-  // Turn the LED on, then pause
-  for (int i = 0; i <= 3; i++) {
-    leds[0] = color;
-    FastLED.show();
-    delay(100);
-    // Now turn the LED off, then pause
-    leds[0] = CRGB::Black;
-    FastLED.show();
-    delay(100);
-  }
-}
-
-
-
-
